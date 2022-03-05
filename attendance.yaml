@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: empms-attendance
+  name: empms-attendance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: empms-attendance
+  template:
+    metadata:
+      labels:
+        app: empms-attendance
+    spec:
+      initContainers:
+      - name: init-mysql
+        image: opstree/empms-mysql-healthcheck:1.0
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_USERNAME
+          value: "root"
+        - name: MYSQL_PASSWORD
+          value: "password"
+        - name: MYSQL_HOST
+          value: "empms-db"
+        - name: MYSQL_DATABASE
+          value: "attendancedb"
+        - name: SLEEP_INTERVAL
+          value: "30"
+      containers:
+      # Changing the tag from 1.0 to 2.0
+      - image: opstree/empms-attendance:2.0
+        imagePullPolicy: Always
+        name: empms-attendance
+        ports:
+        - containerPort: 8081
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: empms-attendance
+spec:
+  type: ClusterIP
+  selector:
+    app: empms-attendance
+  ports:
+  - protocol: TCP
+    port: 8081

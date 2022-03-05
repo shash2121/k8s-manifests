@@ -1,0 +1,52 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "empms-employee"
+spec:
+  selector:
+    matchLabels:
+      app: "empms-employee"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "empms-employee"
+    spec:
+      containers:
+      - image: 379084745218.dkr.ecr.us-east-1.amazonaws.com/employee:1
+        imagePullPolicy: Always
+        name: "empms-employee"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 150m
+            memory: 200Mi   
+        ports:
+        - containerPort: 8083
+        # env:
+        # - name: CONFIG_FILE
+        #   value: "/app/config.yaml"
+        # volumeMounts:
+        # - name: volume
+        #   mountPath: /app/config.yaml
+        #   subPath: config.yaml  
+      volumes:
+      - name: volume
+        configMap:
+          name: employee-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: employee-service
+spec:
+  selector:
+    app: empms-employee
+  ports:
+    - name: http
+      port: 8083
+      targetPort: 8083
+  type: ClusterIP

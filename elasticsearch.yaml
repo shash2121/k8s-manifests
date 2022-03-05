@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "empms-es"
+spec:
+  selector:
+    matchLabels:
+      app: "empms-es"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "empms-es"
+    spec:
+      containers:
+      - image: 379084745218.dkr.ecr.us-east-1.amazonaws.com/elasticsearch:1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 350m
+            memory: 1Gi   
+        name: "empms-es"
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        # env:
+        # - name: ES_JAVA_OPTS 
+        #   value: -Xmx512m -Xms512m
+        # - name: ELASTIC_PASSWORD
+        #   value: elastic
+        # envFrom:
+        # - configMapRef:
+        #     name: es-config  
+        volumeMounts:
+        - name: elasticsearch
+          mountPath: /usr/share/elasticsearch/data    
+      volumes:
+        - name: elasticsearch    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: empms-es
+spec:
+  selector:
+    app: empms-es
+  ports:
+    - name: http
+      port: 9200
+      targetPort: 9200
+    - name: http-2
+      port: 9300
+      targetPort: 9300  
+  type: ClusterIP 

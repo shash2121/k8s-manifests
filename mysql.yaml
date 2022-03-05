@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: empms-db
+  name: empms-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: empms-db
+  template:
+    metadata:
+      labels:
+        app: empms-db
+    spec:
+      containers:
+      - image: 379084745218.dkr.ecr.us-east-1.amazonaws.com/db:1
+        imagePullPolicy: Always
+        name: empms-db
+        env:
+        - name: MYSQL_DATABASE
+          value: attendancedb
+        ports:
+        - containerPort: 3306
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: empms-db
+spec:
+  type: ClusterIP
+  selector:
+    app: empms-db
+  ports:
+  - protocol: TCP
+    port: 3306

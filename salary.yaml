@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "empms-salary"
+spec:
+  selector:
+    matchLabels:
+      app: "empms-salary"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "empms-salary"
+    spec:
+      containers:
+      - image: 379084745218.dkr.ecr.us-east-1.amazonaws.com/salary:1
+        imagePullPolicy: Always
+        name: "empms-salary"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 150m
+            memory: 200Mi   
+        ports:
+        - containerPort: 8082
+        env:
+        - name: CONFIG_FILE
+          value: "/app/config.yaml"
+        volumeMounts:
+        - name: volume
+          mountPath: /app/config.yaml
+          subPath: config.yaml  
+      volumes:
+      - name: volume
+        configMap:
+          name: salary-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: empms-salary
+spec:
+  selector:
+    app: empms-salary
+  ports:
+    - name: http
+      port: 8082
+      targetPort: 8082
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: salary-config
+data:
+  config.yaml: |
+  enabled: "true"
+  host: "http://empms-es:9200"
+  username: "elastic"
+  password: "elastic"
+  api_port: "8082"

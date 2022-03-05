@@ -1,0 +1,35 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: empms-gateway
+  name: empms-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: empms-gateway
+  template:
+    metadata:
+      labels:
+        app: empms-gateway
+    spec:
+      containers:
+      - image: 379084745218.dkr.ecr.us-east-1.amazonaws.com/gateway:1
+        imagePullPolicy: Always
+        name: empms-gateway
+        ports:
+        - containerPort: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: empms-gateway
+spec:
+  type: ClusterIP
+  selector:
+    app: empms-gateway
+  ports:
+  - protocol: TCP
+    port: 8080
